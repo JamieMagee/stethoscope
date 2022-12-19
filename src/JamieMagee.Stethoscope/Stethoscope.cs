@@ -4,6 +4,8 @@ using System.Text.Json;
 using Docker.DotNet;
 using Docker.DotNet.Models;
 using Microsoft.Extensions.Logging;
+using Models;
+using SharpCompress.Common;
 using SharpCompress.Readers;
 
 public class Stethoscope : IStethoscope
@@ -31,25 +33,57 @@ public class Stethoscope : IStethoscope
             await this.TryPullImageAsync(image, cancellationToken);
         }
 
-        var imageInspect = await this.InspectImageAsync(image, cancellationToken);
-        var tempFile = Path.GetTempFileName();
+        var tempDirectory = Path.Join(Path.GetTempPath(), "stethoscope");
+        if (!Directory.Exists(tempDirectory))
+        {
+            _ = Directory.CreateDirectory(tempDirectory);
+        }
+
         var imageStream = await this.client.Images.SaveImageAsync(image, cancellationToken);
-        await using var tempStream = File.OpenWrite(tempFile);
         using var reader = ReaderFactory.Open(imageStream);
+
+        IEnumerable<Manifest> manifests = null;
+        IList<string> layers = new List<string>();
+
         while (reader.MoveToNextEntry())
         {
             this.logger.LogInformation(reader.Entry.Key);
-            if (reader.Entry.Key.EndsWith(".tar"))
+            switch (reader.Entry.Key)
             {
-                var layer = reader.OpenEntryStream();
-                var layerReader = ReaderFactory.Open(layer);
-                while (layerReader.MoveToNextEntry())
+                case "manifest.json":
                 {
-                    this.logger.LogInformation(layerReader.Entry.Key);
+                    await using var entryStream = reader.OpenEntryStream();
+                    manifests = await JsonSerializer.DeserializeAsync<IEnumerable<Manifest>>(entryStream, cancellationToken: cancellationToken);
+                    break;
+                }
+
+                case var _ when reader.Entry.Key.EndsWith("layer.tar", StringComparison.OrdinalIgnoreCase):
+                {
+                    await using var layerStream = reader.OpenEntryStream();
+                    var layerPath = Path.Join(tempDirectory, reader.Entry.Key.Split('/')[0]);
+                    if (!Directory.Exists(layerPath))
+                    {
+                        _ = Directory.CreateDirectory(layerPath);
+                    }
+
+                    using var layerReader = ReaderFactory.Open(layerStream);
+                    while (layerReader.MoveToNextEntry())
+                    {
+                        if (!layerReader.Entry.IsDirectory)
+                        {
+                            layerReader.WriteEntryToDirectory(layerPath, new ExtractionOptions()
+                            {
+                                ExtractFullPath = true,
+                                Overwrite = true,
+                            });
+                        }
+                    }
+
+                    layers.Add(layerPath);
+                    break;
                 }
             }
         }
-
     }
 
     private async Task<bool> ImageExistsLocallyAsync(string image, CancellationToken cancellationToken = default)
@@ -73,7 +107,11 @@ public class Stethoscope : IStethoscope
         };
         try
         {
-            await this.client.Images.CreateImageAsync(parameters, null, null, cancellationToken);
+            var progress = new Progress<JSONMessage>(message =>
+            {
+                this.logger.LogInformation(JsonSerializer.Serialize(message));
+            });
+            await this.client.Images.CreateImageAsync(parameters, null, progress, cancellationToken);
             return true;
         }
         catch (Exception e)
