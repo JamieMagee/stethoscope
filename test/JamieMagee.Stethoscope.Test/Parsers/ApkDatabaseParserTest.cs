@@ -6,12 +6,12 @@ using JamieMagee.Stethoscope.Parsers;
 public class ApkDatabaseParserTest
 {
     [Fact]
-    public async Task Parse()
+    public async Task Should_ParseAsync_Installed()
     {
         using var streamReader = new StreamReader(Path.Join(Environment.CurrentDirectory, "Resources", "Apk", "installed"));
 
         var result = await ApkDatabaseParser.ParseAsync(streamReader);
 
-        result.Should().HaveCount(10);
+        result.Should().HaveCount(14);
     }
 }

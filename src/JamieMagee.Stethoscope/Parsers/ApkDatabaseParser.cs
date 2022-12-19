@@ -12,7 +12,7 @@ public static class ApkDatabaseParser
         {
             var line = await reader.ReadLineAsync();
             var apk = new ApkMetadata();
-            while (line != string.Empty)
+            while (!reader.EndOfStream && line != string.Empty)
             {
                 switch (line)
                 {
