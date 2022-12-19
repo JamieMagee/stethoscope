@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup Label="Build">
+    <TargetFramework>net6.0</TargetFramework>
+  </PropertyGroup>
+
+  <PropertyGroup Label="Package">
+    <Product>PROJECT-TITLE-XML</Product>
+    <Description>PROJECT-DESCRIPTION-XML</Description>
+    <PackageTags>PROJECT-TAGS</PackageTags>
+  </PropertyGroup>
+
+  <ItemGroup Label="Package References">
+    <PackageReference Include="Docker.DotNet" Version="3.125.12" />
+    <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
+    <PackageReference Include="SharpCompress" Version="0.32.2" />
+  </ItemGroup>
+
+</Project>
