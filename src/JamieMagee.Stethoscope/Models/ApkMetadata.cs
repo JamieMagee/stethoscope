@@ -9,20 +9,41 @@ using System.Text.Json.Serialization;
 /// - https://git.alpinelinux.org/apk-tools/tree/src/package.c
 /// - https://git.alpinelinux.org/apk-tools/tree/src/database.c
 /// </summary>
+/// TODO: Implement V2 properties https://wiki.alpinelinux.org/wiki/Apk_spec#Installed_Database_V2
 public sealed record ApkMetadata
 {
+    /// <summary>
+    /// <code>P</code>
+    /// Package name.
+    /// </summary>
     [JsonPropertyName("package")]
     public string Package { get; set; }
 
+    /// <summary>
+    /// <code>o</code>
+    /// Origin.
+    /// </summary>
     [JsonPropertyName("originPackage")]
     public string OriginPackage { get; set; }
 
+    /// <summary>
+    /// <code>m</code>
+    /// Maintainer.
+    /// </summary>
     [JsonPropertyName("maintainer")]
     public string Maintainer { get; set; }
 
+    /// <summary>
+    /// <code>V</code>
+    /// Package version.
+    /// </summary>
     [JsonPropertyName("version")]
     public string Version { get; set; }
 
+    /// <summary>
+    /// <code>L</code>
+    /// License.
+    /// </summary>
     [JsonPropertyName("license")]
     public string License { get; set; }
 
@@ -42,10 +63,10 @@ public sealed record ApkMetadata
     public long InstalledSize { get; set; }
 
     [JsonPropertyName("dependencies")]
-    public string[] Dependencies { get; set; }
+    public IList<string> Dependencies { get; set; }
 
     [JsonPropertyName("provides")]
-    public string[] Provides { get; set; }
+    public IList<string> Provides { get; set; }
 
     [JsonPropertyName("checksum")]
     public string Checksum { get; set; }
