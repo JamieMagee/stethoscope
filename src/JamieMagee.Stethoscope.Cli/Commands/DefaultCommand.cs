@@ -20,8 +20,7 @@ public class DefaultCommand : AsyncCommand<DefaultCommandSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, DefaultCommandSettings settings)
     {
-        this.logger.LogInformation("Hello from app");
-        var location = await this.dockerDaemon.SaveImageLayersToDiskAsync();
+        var location = await this.dockerDaemon.SaveImageLayersToDiskAsync(settings.Image);
 
         var apkDatabase =
             new Matcher()
