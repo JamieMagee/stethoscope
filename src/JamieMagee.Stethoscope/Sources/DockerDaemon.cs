@@ -10,12 +10,8 @@ using SharpCompress.Readers.Tar;
 
 public class DockerDaemon
 {
-    private readonly ILogger<DockerDaemon> logger;
     private readonly IDockerClient client;
-
-    private static readonly string StethoscopeTempPath = Path.Combine(Path.GetTempPath(), "stethoscope");
-    private static readonly string LayersTempPath = Path.Combine(StethoscopeTempPath, "layers");
-    private static readonly string ImagesTempPath = Path.Combine(StethoscopeTempPath, "images");
+    private readonly ILogger<DockerDaemon> logger;
 
     // See https://github.com/opencontainers/image-spec/blob/main/layer.md#whiteouts
     private const string WhiteoutMarkerPrefix = ".wh.";
@@ -27,9 +23,8 @@ public class DockerDaemon
         this.client = new DockerClientConfiguration().CreateClient();
     }
 
-    public async Task<string> SaveImageLayersToDiskAsync(CancellationToken cancellationToken = default)
+    public async Task<string> SaveImageLayersToDiskAsync(string image, CancellationToken cancellationToken = default)
     {
-        const string image = "mcr.microsoft.com/dotnet/sdk:7.0-alpine";
         this.logger.LogInformation("Hello world!");
 
         if (!await this.ImageExistsLocallyAsync(image, cancellationToken))
@@ -60,7 +55,7 @@ public class DockerDaemon
             imageDirectory = imageDirectory.Replace(invalidChar, '-');
         }
 
-        var destPath = Path.Join(ImagesTempPath, imageDirectory);
+        var destPath = Path.Join(Constants.ImagesTempPath, imageDirectory);
         if (!Directory.Exists(destPath))
         {
             Directory.CreateDirectory(destPath);
@@ -82,7 +77,7 @@ public class DockerDaemon
 
                 case var _ when reader.Entry.Key.EndsWith("layer.tar", StringComparison.OrdinalIgnoreCase):
                 {
-                    var layerPath = Path.Join(LayersTempPath, reader.Entry.Key.Split('/')[0]);
+                    var layerPath = Path.Join(Constants.LayersTempPath, reader.Entry.Key.Split('/')[0]);
 
                     if (Directory.Exists(layerPath))
                     {
