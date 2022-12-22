@@ -8,6 +8,7 @@
   <ItemGroup>
     <PackageReference Include="Docker.DotNet" Version="3.125.12" />
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
+    <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
     <PackageReference Include="SharpCompress" Version="0.32.2" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.45.1-preview.0.47" />

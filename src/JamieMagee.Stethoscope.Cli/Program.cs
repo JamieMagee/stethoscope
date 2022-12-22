@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Spectre.Console.Cli;
 using Spectre.Console.Cli.Extensions.DependencyInjection;
 
-Console.WriteLine("Hello");
 var serviceCollection = new ServiceCollection()
     .AddLogging(configure =>
         configure.AddSimpleConsole(options =>
@@ -13,7 +12,7 @@ var serviceCollection = new ServiceCollection()
             options.SingleLine = true;
             options.IncludeScopes = true;
         }))
-    .AddSingleton<IStethoscope, Stethoscope>();
+    .AddStethoscope();
 using var registrar = new DependencyInjectionRegistrar(serviceCollection);
 var app = new CommandApp<DefaultCommand>(registrar);
 return await app.RunAsync(args);

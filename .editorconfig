@@ -472,3 +472,4 @@ dotnet_diagnostic.SA1633.severity = none
 ##########################################
 
 dotnet_diagnostic.CA1852.severity = none
+dotnet_diagnostic.CA2007.severity = none
