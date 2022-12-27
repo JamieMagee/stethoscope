@@ -1,6 +1,7 @@
 ﻿namespace JamieMagee.Stethoscope.Models;
 
 using System.Text.Json.Serialization;
+using JamieMagee.Stethoscope.Catalogers;
 
 /// <summary>
 /// ApkMetadata represents all captured data for a Alpine DB package entry.
@@ -10,7 +11,7 @@ using System.Text.Json.Serialization;
 /// - https://git.alpinelinux.org/apk-tools/tree/src/database.c
 /// </summary>
 /// TODO: Implement V2 properties https://wiki.alpinelinux.org/wiki/Apk_spec#Installed_Database_V2
-public sealed record ApkMetadata
+public sealed record ApkMetadata : IPackageMetadata
 {
     /// <summary>
     /// <code>P</code>

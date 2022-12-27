@@ -1,11 +1,11 @@
-﻿namespace JamieMagee.Stethoscope.Parsers;
+﻿namespace JamieMagee.Stethoscope.Catalogers.Apk;
 
 using System.Globalization;
 using JamieMagee.Stethoscope.Models;
 
 public static class ApkDatabaseParser
 {
-    public static async Task<IEnumerable<ApkMetadata>> ParseAsync(StreamReader reader)
+    public static async Task<IEnumerable<ApkMetadata>> ParseAsync(StreamReader reader, CancellationToken cancellationToken = default)
     {
         var apks = new List<ApkMetadata>();
 
@@ -48,9 +48,11 @@ public static class ApkDatabaseParser
                         apk.InstalledSize = long.Parse(line[2..], NumberFormatInfo.InvariantInfo);
                         break;
                     case { } when line.StartsWith("D", StringComparison.Ordinal):
+                        apk.Dependencies ??= new List<string>();
                         apk.Dependencies.Add(line[2..]);
                         break;
                     case { } when line.StartsWith("p", StringComparison.Ordinal):
+                        apk.Provides ??= new List<string>();
                         apk.Provides.Add(line[2..]);
                         break;
                     case { } when line.StartsWith("C", StringComparison.Ordinal):

@@ -1,7 +1,7 @@
 ﻿namespace JamieMagee.Stethoscope.Test.Parsers;
 
+using Catalogers.Apk;
 using FluentAssertions;
-using JamieMagee.Stethoscope.Parsers;
 
 public class ApkDatabaseParserTest
 {

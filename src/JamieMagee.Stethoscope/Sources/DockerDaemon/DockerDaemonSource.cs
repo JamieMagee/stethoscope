@@ -1,4 +1,4 @@
-namespace JamieMagee.Stethoscope;
+namespace JamieMagee.Stethoscope.Sources.DockerDaemon;
 
 using System.Text.Json;
 using Docker.DotNet;
@@ -8,37 +8,30 @@ using Microsoft.Extensions.Logging;
 using SharpCompress.Readers;
 using SharpCompress.Readers.Tar;
 
-public class DockerDaemon
+public class DockerDaemonSource : Source, IDockerDaemonSource
 {
     private readonly IDockerClient client;
-    private readonly ILogger<DockerDaemon> logger;
+    private readonly ILogger<DockerDaemonSource> logger;
 
     // See https://github.com/opencontainers/image-spec/blob/main/layer.md#whiteouts
     private const string WhiteoutMarkerPrefix = ".wh.";
     private const string OpaqueWhiteoutMarker = ".wh..wh..opq";
 
-    public DockerDaemon(ILogger<DockerDaemon> logger)
+    public DockerDaemonSource(ILogger<DockerDaemonSource> logger)
     {
         this.logger = logger;
         this.client = new DockerClientConfiguration().CreateClient();
     }
 
-    public async Task<string> SaveImageLayersToDiskAsync(string image, CancellationToken cancellationToken = default)
+    public override async Task<string> SaveImageAsync(string image, CancellationToken cancellationToken = default)
     {
-        this.logger.LogInformation("Hello world!");
-
-        if (!await this.ImageExistsLocallyAsync(image, cancellationToken))
+        if (!await this.TryPullImageAsync(image, cancellationToken))
         {
-            await this.TryPullImageAsync(image, cancellationToken);
+            this.logger.LogCritical($"Can't pull image ${image}");
+            throw new ArgumentException();
         }
 
-        var tempDirectory = Path.Join(Path.GetTempPath(), "stethoscope");
-        if (!Directory.Exists(tempDirectory))
-        {
-            _ = Directory.CreateDirectory(tempDirectory);
-        }
-
-        var imageHistory = await this.client.Images.GetImageHistoryAsync(image, cancellationToken);
+        this.EnsureTempDirs();
 
         await using var imageStream = await this.client.Images.SaveImageAsync(image, cancellationToken);
         await using var memoryStream = new MemoryStream();
@@ -47,25 +40,12 @@ public class DockerDaemon
         using var reader = ReaderFactory.Open(memoryStream);
 
         IEnumerable<Manifest> manifests = null;
-        IList<string> layers = new List<string>();
-
-        var imageDirectory = image;
-        foreach (var invalidChar in Path.GetInvalidPathChars())
-        {
-            imageDirectory = imageDirectory.Replace(invalidChar, '-');
-        }
-
-        var destPath = Path.Join(Constants.ImagesTempPath, imageDirectory);
-        if (!Directory.Exists(destPath))
-        {
-            Directory.CreateDirectory(destPath);
-        }
+        var destPath = this.EnsureImageDir(image);
 
         this.logger.LogInformation($"Will unpack to {destPath}");
 
         while (reader.MoveToNextEntry())
         {
-            this.logger.LogInformation(reader.Entry.Key);
             switch (reader.Entry.Key)
             {
                 case "manifest.json":
@@ -87,7 +67,7 @@ public class DockerDaemon
                     {
                         this.logger.LogInformation($"Extracting layer to {layerPath}");
                         await using var layerStream = reader.OpenEntryStream();
-                        this.ExtractLayerAsync(layerStream, layerPath);
+                        await this.ExtractLayerAsync(layerStream, layerPath);
                     }
 
                     this.logger.LogInformation($"Applying layer {reader.Entry.Key.Split('/')[0]} to {destPath}");
@@ -100,7 +80,7 @@ public class DockerDaemon
         return destPath;
     }
 
-    private void ExtractLayerAsync(Stream stream, string layerDir)
+    private async Task ExtractLayerAsync(Stream stream, string layerDir)
     {
         var reader = TarReader.Open(stream);
         while (reader.MoveToNextEntry())
@@ -131,11 +111,11 @@ public class DockerDaemon
             }
 
             entryName = Path.Combine(entryDirName, entryFileName);
-            ExtractTarEntry(layerDir, reader, entryName);
+            await ExtractTarEntryAsync(layerDir, reader, entryName);
         }
     }
 
-    private static async Task ExtractTarEntry(string workingDir, TarReader reader, string entryName)
+    private static async Task ExtractTarEntryAsync(string workingDir, TarReader reader, string entryName)
     {
         var filePath = Path.Combine(workingDir, entryName);
         var directoryPath = Path.GetDirectoryName(filePath);
@@ -177,8 +157,6 @@ public class DockerDaemon
 
     private void ApplyLayer(string layerDir, string workingDir)
     {
-        this.logger.LogInformation("Applying layer");
-
         var layerFiles = new DirectoryInfo(layerDir).GetFiles("*", SearchOption.AllDirectories);
 
         foreach (var layerFile in layerFiles)
@@ -239,19 +217,6 @@ public class DockerDaemon
         }
     }
 
-    private async Task<bool> ImageExistsLocallyAsync(string image, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            await this.client.Images.InspectImageAsync(image, cancellationToken);
-            return true;
-        }
-        catch (Exception e)
-        {
-            return false;
-        }
-    }
-
     private async Task<bool> TryPullImageAsync(string image, CancellationToken cancellationToken = default)
     {
         var parameters = new ImagesCreateParameters
@@ -262,26 +227,18 @@ public class DockerDaemon
         {
             var progress = new Progress<JSONMessage>(message =>
             {
-                this.logger.LogInformation(JsonSerializer.Serialize(message));
+                this.logger.LogDebug(message.Status);
+                this.logger.LogTrace(JsonSerializer.Serialize(message));
             });
             await this.client.Images.CreateImageAsync(parameters, null, progress, cancellationToken);
+
             return true;
         }
         catch (Exception e)
         {
-            return false;
+            // ignored
         }
-    }
 
-    public async Task<ImageInspectResponse> InspectImageAsync(string image, CancellationToken cancellationToken = default)
-    {
-        try
-        {
-            return await this.client.Images.InspectImageAsync(image, cancellationToken);
-        }
-        catch (Exception e)
-        {
-            return null;
-        }
+        return false;
     }
 }

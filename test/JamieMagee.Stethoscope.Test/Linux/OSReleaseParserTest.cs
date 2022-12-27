@@ -1,8 +1,8 @@
 namespace JamieMagee.Stethoscope.Test.Linux;
 
 using FluentAssertions;
-using JamieMagee.Stethoscope.Linux;
 using JamieMagee.Stethoscope.Models;
+using OperatingSystems.OsRelease;
 
 public class OsReleaseParserTest
 {

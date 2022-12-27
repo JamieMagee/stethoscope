@@ -1,39 +1,56 @@
 namespace JamieMagee.Stethoscope.Cli.Commands;
 
+using JamieMagee.Stethoscope.Catalogers;
 using JamieMagee.Stethoscope.Cli.Settings;
-using JamieMagee.Stethoscope.Parsers;
-using Microsoft.Extensions.FileSystemGlobbing;
-using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
+using JamieMagee.Stethoscope.OperatingSystems;
+using JamieMagee.Stethoscope.Sources;
 using Microsoft.Extensions.Logging;
+using Spectre.Console;
 using Spectre.Console.Cli;
 
 public class DefaultCommand : AsyncCommand<DefaultCommandSettings>
 {
-    private readonly DockerDaemon dockerDaemon;
+    private readonly ICatalogProvider catalogProvider;
+    private readonly IIdentifierProvider identifierProvider;
     private readonly ILogger<DefaultCommand> logger;
+    private readonly ISourceFactory sourceFactory;
 
-    public DefaultCommand(DockerDaemon dockerDaemon, ILogger<DefaultCommand> logger)
+    public DefaultCommand(
+        ISourceFactory sourceFactory,
+        ICatalogProvider catalogProvider,
+        IIdentifierProvider identifierProvider,
+        ILogger<DefaultCommand> logger)
     {
-        this.dockerDaemon = dockerDaemon;
+        this.sourceFactory = sourceFactory;
+        this.catalogProvider = catalogProvider;
+        this.identifierProvider = identifierProvider;
         this.logger = logger;
     }
 
     public override async Task<int> ExecuteAsync(CommandContext context, DefaultCommandSettings settings)
     {
-        var location = await this.dockerDaemon.SaveImageLayersToDiskAsync(settings.Image);
+        var (sourceProvider, image) = this.sourceFactory.GetSourceProvider(settings.Image);
+        var location = await sourceProvider.SaveImageAsync(image);
+        var packages = await this.catalogProvider.CatalogAsync(location);
+        await this.identifierProvider.IdentifyOperatingSystemAsync(location);
 
-        var apkDatabase =
-            new Matcher()
-                .AddInclude("**/lib/apk/db/installed")
-                .Execute(new DirectoryInfoWrapper(new DirectoryInfo(location)));
-
-        if (apkDatabase.HasMatches)
-        {
-            await using var stream = File.Open(Path.Join(location, apkDatabase.Files.First().Path), FileMode.Open);
-            var reader = new StreamReader(stream);
-            var results = await ApkDatabaseParser.ParseAsync(reader);
-        }
+        ShowPackagesTable(packages);
 
         return 0;
+    }
+
+    private static void ShowPackagesTable(IEnumerable<IPackageMetadata> packages)
+    {
+        var table = new Table();
+
+        table.AddColumn("Package");
+        table.AddColumn("Version");
+
+        foreach (var package in packages)
+        {
+            table.AddRow(package.Package, package.Version);
+        }
+
+        AnsiConsole.Write(table);
     }
 }

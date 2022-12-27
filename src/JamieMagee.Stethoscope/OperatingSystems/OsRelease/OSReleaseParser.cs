@@ -1,4 +1,4 @@
-namespace JamieMagee.Stethoscope.Linux;
+namespace JamieMagee.Stethoscope.OperatingSystems.OsRelease;
 
 using JamieMagee.Stethoscope.Extensions;
 using JamieMagee.Stethoscope.Models;

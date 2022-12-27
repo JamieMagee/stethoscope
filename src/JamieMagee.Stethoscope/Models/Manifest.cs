@@ -20,7 +20,7 @@ public record Manifest
     public IEnumerable<string> RepoTags { get; init; }
 
     /// <summary>
-    /// A list
+    /// A list of layers.
     /// </summary>
     [JsonPropertyName("Layers")]
     public IEnumerable<string> Layers { get; init; }
