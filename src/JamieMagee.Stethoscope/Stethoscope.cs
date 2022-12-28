@@ -1,5 +1,6 @@
 namespace JamieMagee.Stethoscope;
 
+using Catalogers.Windows;
 using JamieMagee.Stethoscope.Catalogers;
 using JamieMagee.Stethoscope.Catalogers.Apk;
 using JamieMagee.Stethoscope.Catalogers.Dpkg;
@@ -22,6 +23,7 @@ public static class Stethoscope
         services.AddSingleton<ICatalogProvider, CatalogProvider>();
         services.AddSingleton<ICataloger, ApkCataloger>();
         services.AddSingleton<ICataloger, DpkgCataloger>();
+        services.AddSingleton<ICataloger, WindowsCataloger>();
 
         services.AddSingleton<IIdentifierProvider, IdentifierProvider>();
         services.AddSingleton<IIdentifier, OsReleaseIdentifier>();

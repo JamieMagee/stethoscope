@@ -5,7 +5,7 @@ using Registry;
 
 public class WindowsIdentifier : IIdentifier
 {
-    public string Globs => "**/Files/Windows/System32/config/SOFTWARE";
+    public string Globs => "**/Windows/System32/config/SOFTWARE";
 
     public async Task RunAsync(Stream stream, CancellationToken cancellationToken = default)
     {

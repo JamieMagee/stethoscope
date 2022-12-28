@@ -4,5 +4,5 @@ public interface ICataloger
 {
     public string Globs { get; }
 
-    Task<IEnumerable<IPackageMetadata>> RunAsync(StreamReader reader, CancellationToken cancellationToken = default);
+    Task<IEnumerable<IPackageMetadata>> RunAsync(Stream stream, CancellationToken cancellationToken = default);
 }

@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  release:
+    types:
+      - published
+  workflow_dispatch:
+
+env:
+  DOTNET_NOLOGO: true
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: true
+  DOTNET_CLI_TELEMETRY_OPTOUT: true
+  MINVERBUILDMETADATA: build.${{github.run_number}}
+
+obs:
+  exe:
+    name: Build executables
+    runs-on: ubuntu-latest
+
+    strategy:
+      matrix:
+        rid:
+          - win-x64
+          - win-arm64
+          - osx-x64
+          - osx-arm64
+          - linux-x64
+          - linux-arm64
+          - linux-musl-x64
+          - linux-musl-arm64
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup .NET Core SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: "7.0.x"
+
+      - name: Install dependencies
+        working-directory: src/JamieMagee.Stethoscope.Cli
+        run: dotnet restore --runtime ${{ matrix.rid }} /p:PublishReadyToRun=true
+
+      - name: Publish
+        working-directory: src/JamieMagee.Stethoscope.Cli
+        run: dotnet publish -f net7.0 -c Release --no-restore -o ${{ github.workspace }}/publish --runtime ${{ matrix.rid }} --self-contained /p:PublishTrimmed=true /p:PublishReadyToRun=true /p:PublishSingleFile=true /p:TrimMode=partial
+
+      - name: Rename output
+        run: |
+          if [[ "${{ matrix.rid }}" == *"win"* ]]; then
+            stethoscopeExt=".exe"
+          else
+            stethoscopeExt=""
+          fi
+
+          exeName="stethoscope-${{ github.event.inputs.packageVersion }}-${{ matrix.rid }}${stethoscopeExt}"
+          echo "EXE_NAME=${exeName}" >> $G  ITHUB_ENV
+          mv ${{ github.workspace }}/publish/stethoscope${stethoscopeExt} ${{ github.workspace }}/publish/${exeName}
+          rm ${{ github.workspace }}/publish/stethoscope.pdb
+
+      - name: Generate checksum
+        run: sha256sum ${EXE_NAME} >${EXE_NAME}.sha256sum
+        working-directory: ${{ github.workspace }}/publish
+
+      - name: Save build binaries
+        uses: actions/upload-artifact@v3
+        with:
+          name: stethoscope-binaries-${{ matrix.rid }}
+          path: ${{ github.workspace }}/publish

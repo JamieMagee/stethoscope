@@ -11,6 +11,6 @@ public class DpkgCataloger : ICataloger
     public string Globs => "";
 
     public Task<IEnumerable<IPackageMetadata>> RunAsync(
-        StreamReader reader,
+        Stream stream,
         CancellationToken cancellationToken = default) => throw new NotImplementedException();
 }

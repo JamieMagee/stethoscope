@@ -13,8 +13,11 @@ internal sealed class ApkCataloger : ICataloger
 
     public string Globs => "**/lib/apk/db/installed";
 
-    public async Task<IEnumerable<IPackageMetadata>> RunAsync(StreamReader reader, CancellationToken cancellationToken = default)
+    public async Task<IEnumerable<IPackageMetadata>> RunAsync(
+        Stream stream,
+        CancellationToken cancellationToken = default)
     {
+        var reader = new StreamReader(stream);
         return await ApkDatabaseParser.ParseAsync(reader);
     }
 }

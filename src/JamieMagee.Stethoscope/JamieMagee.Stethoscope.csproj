@@ -17,6 +17,7 @@
     <PackageReference Include="Microsoft.Extensions.Logging.Abstractions" Version="7.0.0" />
     <PackageReference Include="Registry" Version="1.3.3.2" />
     <PackageReference Include="SharpCompress" Version="0.32.2" />
+    <PackageReference Include="Valleysoft.DockerRegistryClient" Version="3.0.0" />
   </ItemGroup>
 
 </Project>

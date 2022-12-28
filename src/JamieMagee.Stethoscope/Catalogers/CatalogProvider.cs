@@ -27,8 +27,7 @@ public class CatalogProvider : ICatalogProvider
             if (result.HasMatches)
             {
                 var fileStream = File.OpenRead(Path.Join(location, result.Files.First().Path));
-                using var reader = new StreamReader(fileStream);
-                packages.AddRange(await cataloger.RunAsync(reader, cancellationToken));
+                packages.AddRange(await cataloger.RunAsync(fileStream, cancellationToken));
             }
         }
 

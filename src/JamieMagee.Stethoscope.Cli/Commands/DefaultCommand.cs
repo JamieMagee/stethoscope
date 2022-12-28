@@ -1,5 +1,6 @@
 namespace JamieMagee.Stethoscope.Cli.Commands;
 
+using Catalogers.Windows;
 using JamieMagee.Stethoscope.Catalogers;
 using JamieMagee.Stethoscope.Cli.Settings;
 using JamieMagee.Stethoscope.OperatingSystems;
@@ -29,12 +30,14 @@ public class DefaultCommand : AsyncCommand<DefaultCommandSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, DefaultCommandSettings settings)
     {
-        var (sourceProvider, image) = this.sourceFactory.GetSourceProvider(settings.Image);
-        var location = await sourceProvider.SaveImageAsync(image);
-        var packages = await this.catalogProvider.CatalogAsync(location);
-        await this.identifierProvider.IdentifyOperatingSystemAsync(location);
+        // var (sourceProvider, image) = this.sourceFactory.GetSourceProvider(settings.Image);
+        // var location = await sourceProvider.SaveImageAsync(image);
+        // var packages = await this.catalogProvider.CatalogAsync(location);
+        // await this.identifierProvider.IdentifyOperatingSystemAsync(location);
 
-        ShowPackagesTable(packages);
+        // ShowPackagesTable(packages);
+        var location = "/tmp/dredge/nanoserver";
+        var packages = await this.catalogProvider.CatalogAsync(location);
 
         return 0;
     }
