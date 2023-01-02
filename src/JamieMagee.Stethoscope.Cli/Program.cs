@@ -8,7 +8,7 @@ using Spectre.Console.Cli.Extensions.DependencyInjection;
 
 var config = new ConfigurationBuilder()
     .SetBasePath(Directory.GetCurrentDirectory())
-    .AddJsonFile("appsettings.json", optional: true)
+    .AddJsonFile("appsettings.json", true)
     .Build();
 
 var serviceCollection = new ServiceCollection()
@@ -21,4 +21,12 @@ var serviceCollection = new ServiceCollection()
     .AddStethoscope();
 using var registrar = new DependencyInjectionRegistrar(serviceCollection);
 var app = new CommandApp<DefaultCommand>(registrar);
+app.Configure(config =>
+{
+    config.CaseSensitivity(CaseSensitivity.None);
+    config.SetApplicationName("stethoscope");
+    config.AddExample(new[] { "docker-daemon://docker.io/library/alpine:latest" });
+    config.AddExample(new[] { "docker-daemon://docker.io/library/ubuntu:latest" });
+    config.ValidateExamples();
+});
 return await app.RunAsync(args);

@@ -1,6 +1,5 @@
 namespace JamieMagee.Stethoscope.Cli.Commands;
 
-using Catalogers.Windows;
 using JamieMagee.Stethoscope.Catalogers;
 using JamieMagee.Stethoscope.Cli.Settings;
 using JamieMagee.Stethoscope.OperatingSystems;
