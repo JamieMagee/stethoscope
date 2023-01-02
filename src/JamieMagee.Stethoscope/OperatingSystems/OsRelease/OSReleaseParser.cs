@@ -5,11 +5,11 @@ using JamieMagee.Stethoscope.Models;
 
 public static class OsReleaseParser
 {
-    public static async Task<Release> ParseOSReleaseAsync(
+    public static async Task<OSRelease> ParseOSReleaseAsync(
         StreamReader reader,
         CancellationToken cancellationToken = default)
     {
-        var release = new Release();
+        var release = new OSRelease();
 
         while (!reader.EndOfStream)
         {

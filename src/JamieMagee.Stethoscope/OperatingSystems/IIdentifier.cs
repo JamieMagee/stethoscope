@@ -4,5 +4,5 @@ public interface IIdentifier
 {
     public string Globs { get; }
 
-    Task RunAsync(Stream stream, CancellationToken cancellationToken = default);
+    Task<IRelease> RunAsync(Stream stream, CancellationToken cancellationToken = default);
 }

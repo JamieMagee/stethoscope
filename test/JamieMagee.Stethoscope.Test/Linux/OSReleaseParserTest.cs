@@ -8,7 +8,7 @@ public class OsReleaseParserTest
 {
     [Theory]
     [ClassData(typeof(OsReleaseParserTestData))]
-    public async Task Should_ParseOsReleaseAsync(StreamReader reader, Release expected)
+    public async Task Should_ParseOsReleaseAsync(StreamReader reader, OSRelease expected)
     {
         var actual = await OsReleaseParser.ParseOSReleaseAsync(reader);
 

@@ -1,13 +1,14 @@
 namespace JamieMagee.Stethoscope.Test.Linux;
 
 using JamieMagee.Stethoscope.Models;
+using OperatingSystems.OsRelease;
 
-public class OsReleaseParserTestData : TheoryData<StreamReader, Release>
+public class OsReleaseParserTestData : TheoryData<StreamReader, OSRelease>
 {
     public OsReleaseParserTestData() =>
         this.Add(
             CreateStreamReader(Path.Join("mariner", "os-release")),
-            new Release
+            new OSRelease
             {
                 PrettyName = "CBL-Mariner/Linux",
                 Name = "Common Base Linux Mariner",

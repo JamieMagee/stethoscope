@@ -15,7 +15,7 @@ public class IdentifierProvider : IIdentifierProvider
         this.logger = logger;
     }
 
-    public async Task IdentifyOperatingSystemAsync(string location, CancellationToken cancellationToken = default)
+    public async Task<IRelease> IdentifyOperatingSystemAsync(string location, CancellationToken cancellationToken = default)
     {
         foreach (var identifier in this.identifiers)
         {
@@ -26,8 +26,10 @@ public class IdentifierProvider : IIdentifierProvider
             if (result.HasMatches)
             {
                 var fileStream = File.OpenRead(Path.Join(location, result.Files.First().Path));
-                await identifier.RunAsync(fileStream, cancellationToken);
+                return await identifier.RunAsync(fileStream, cancellationToken);
             }
         }
+
+        return null;
     }
 }

@@ -36,6 +36,8 @@ public class WindowsCataloger : ICataloger
 
             var package = hive.GetKey(packageKey.KeyPath);
             var currentState = package.Values.Find(v => v.ValueName == "CurrentState")?.ValueData;
+
+            // Installed
             if (currentState == "112")
             {
                 var groups = updatePackageRegex.Match(package.KeyName).Groups;

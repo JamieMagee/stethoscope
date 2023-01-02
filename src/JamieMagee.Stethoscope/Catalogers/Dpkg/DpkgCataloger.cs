@@ -8,9 +8,13 @@ public class DpkgCataloger : ICataloger
 
     public DpkgCataloger(ILogger<DpkgCataloger> logger) => this.logger = logger;
 
-    public string Globs => "";
+    public string Globs => "**/var/lib/dpkg/status";
 
-    public Task<IEnumerable<IPackageMetadata>> RunAsync(
+    public async Task<IEnumerable<IPackageMetadata>> RunAsync(
         Stream stream,
-        CancellationToken cancellationToken = default) => throw new NotImplementedException();
+        CancellationToken cancellationToken = default)
+    {
+        var reader = new StreamReader(stream);
+        return await DpkgDatabaseParser.ParseAsync(reader);
+    }
 }

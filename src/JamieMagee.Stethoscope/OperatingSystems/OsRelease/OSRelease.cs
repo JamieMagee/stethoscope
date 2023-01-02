@@ -1,4 +1,4 @@
-namespace JamieMagee.Stethoscope.Models;
+namespace JamieMagee.Stethoscope.OperatingSystems.OsRelease;
 
 using System.Text.Json.Serialization;
 
@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 /// Represents Linux Distribution release information.
 /// See https://www.freedesktop.org/software/systemd/man/os-release.html.
 /// </summary>
-public sealed record Release
+public sealed record OSRelease : IRelease
 {
     [JsonPropertyName("prettyName")]
     public string PrettyName { get; set; }

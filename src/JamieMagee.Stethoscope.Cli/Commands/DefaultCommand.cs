@@ -30,14 +30,13 @@ public class DefaultCommand : AsyncCommand<DefaultCommandSettings>
 
     public override async Task<int> ExecuteAsync(CommandContext context, DefaultCommandSettings settings)
     {
-        // var (sourceProvider, image) = this.sourceFactory.GetSourceProvider(settings.Image);
-        // var location = await sourceProvider.SaveImageAsync(image);
-        // var packages = await this.catalogProvider.CatalogAsync(location);
-        // await this.identifierProvider.IdentifyOperatingSystemAsync(location);
-
-        // ShowPackagesTable(packages);
-        var location = "/tmp/dredge/nanoserver";
+        var (sourceProvider, image) = this.sourceFactory.GetSourceProvider(settings.Image);
+        var location = await sourceProvider.SaveImageAsync(image);
         var packages = await this.catalogProvider.CatalogAsync(location);
+        var release = await this.identifierProvider.IdentifyOperatingSystemAsync(location);
+
+        ShowPackagesTable(packages);
+        ShowRelease(release);
 
         return 0;
     }
@@ -55,5 +54,10 @@ public class DefaultCommand : AsyncCommand<DefaultCommandSettings>
         }
 
         AnsiConsole.Write(table);
+    }
+
+    private static void ShowRelease(IRelease release)
+    {
+        AnsiConsole.Write(new Markup($"[bold underline green]{release}[/]"));
     }
 }
