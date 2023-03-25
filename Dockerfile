@@ -1,4 +1,4 @@
-FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner-amd64@sha256:6ba72f0f6bd99ce19b705c965ef124af7e54c65ecefd37c14177a0ff2fc26e2e AS build
+FROM mcr.microsoft.com/dotnet/sdk:7.0-cbl-mariner-amd64@sha256:2c5e6aff48d7656def063c8efb705d4b1dd7f97b0b0b676e825f5f6aab27ce7f AS build
 
 ARG TARGETARCH
 ARG TARGETOS
