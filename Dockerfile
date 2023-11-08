@@ -14,7 +14,7 @@ RUN dotnet restore -r $(cat /tmp/rid) /p:PublishReadyToRun=true
 RUN dotnet publish src/JamieMagee.Stethoscope.Cli/JamieMagee.Stethoscope.Cli.csproj -c Release -f net7.0 -o /app -r $(cat /tmp/rid) --self-contained true --no-restore /p:PublishTrimmed=true /p:PublishReadyToRun=true /p:PublishSingleFile=true
 
 
-FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:7.0-cbl-mariner-distroless@sha256:cff2d129589a81cc8f8b0645cd6478b27dc227180801a37f9de62502423671ce
+FROM mcr.microsoft.com/dotnet/nightly/runtime-deps:7.0-cbl-mariner-distroless@sha256:acae04b5dfc1bf787f5a455ad3505c2ac63a411fa577b5b6a7d6a8cfe377dc59
 WORKDIR /app
 COPY --from=build /app .
 ENTRYPOINT ["./JamieMagee.Stethoscope.Cli"]
