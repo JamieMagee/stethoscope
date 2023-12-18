@@ -16,7 +16,7 @@
     <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.FileSystemGlobbing" Version="7.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Console" Version="7.0.0" />
-    <PackageReference Include="SharpCompress" Version="0.34.2" />
+    <PackageReference Include="SharpCompress" Version="0.35.0" />
     <PackageReference Include="Spectre.Console.Cli" Version="0.48.0" />
     <PackageReference Include="Spectre.Console.Cli.Extensions.DependencyInjection" Version="0.2.0" />
   </ItemGroup>
